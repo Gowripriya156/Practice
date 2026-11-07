@@ -15,3 +15,21 @@ class Solution {
 }
 
 the above code is not optimized. brute force
+
+
+Optimized solution
+
+class Solution {
+    public int[] replaceElements(int[] arr) {
+        int max=-1;
+        int c;
+        for(int i=arr.length-1;i>=0;i--){
+                c=arr[i];
+                arr[i]=max;
+                if(c>max){
+                    max=c;
+                }
+        }
+        return arr;
+    }
+}
