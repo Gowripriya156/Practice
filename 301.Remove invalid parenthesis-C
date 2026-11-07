@@ -1,0 +1,101 @@
+#include <stdlib.h>
+#include <string.h>
+
+char *res[10000];
+int count;
+
+void solve(char *s, int idx, int leftRem, int rightRem,
+           int open, char *path, int len) {
+
+    if (s[idx] == '\0') {
+        if (leftRem == 0 && rightRem == 0 && open == 0) {
+            path[len] = '\0';
+
+            for (int i = 0; i < count; i++) {
+                if (strcmp(res[i], path) == 0)
+                    return;
+            }
+
+            res[count] = malloc(len + 1);
+            strcpy(res[count], path);
+            count++;
+        }
+        return;
+    }
+
+    char c = s[idx];
+
+    if (c == '(') {
+        if (leftRem > 0)
+            solve(s, idx + 1, leftRem - 1, rightRem,
+                  open, path, len);
+
+        path[len] = c;
+        solve(s, idx + 1, leftRem, rightRem,
+              open + 1, path, len + 1);
+    }
+    else if (c == ')') {
+        if (rightRem > 0)
+            solve(s, idx + 1, leftRem, rightRem - 1,
+                  open, path, len);
+
+        if (open > 0) {
+            path[len] = c;
+            solve(s, idx + 1, leftRem, rightRem,
+                  open - 1, path, len + 1);
+        }
+    }
+    else {
+        path[len] = c;
+        solve(s, idx + 1, leftRem, rightRem,
+              open, path, len + 1);
+    }
+}
+
+char** removeInvalidParentheses(char* s, int* returnSize) {
+    int leftRem = 0, rightRem = 0;
+
+    for (int i = 0; s[i] != '\0'; i++) {
+        if (s[i] == '(') {
+            leftRem++;
+        }
+        else if (s[i] == ')') {
+            if (leftRem > 0)
+                leftRem--;
+            else
+                rightRem++;
+        }
+    }
+
+    // Count unmatched opening parentheses to remove.
+    leftRem = 0;
+    for (int i = 0; s[i] != '\0'; i++) {
+        if (s[i] == '(')
+            leftRem++;
+        else if (s[i] == ')') {
+            if (leftRem > 0)
+                leftRem--;
+        }
+    }
+
+    // Recompute the exact number of unmatched '('.
+    int unmatchedOpen = 0;
+    for (int i = 0; s[i] != '\0'; i++) {
+        if (s[i] == '(')
+            unmatchedOpen++;
+        else if (s[i] == ')' && unmatchedOpen > 0)
+            unmatchedOpen--;
+    }
+
+    leftRem = unmatchedOpen;
+
+    count = 0;
+    char *path = malloc(strlen(s) + 1);
+
+    solve(s, 0, leftRem, rightRem, 0, path, 0);
+
+    free(path);
+
+    *returnSize = count;
+    return res;
+}
